@@ -1,10 +1,10 @@
-import { withPageAuthRequired } from '@auth0/nextjs-auth0'
+import { withPageAuthRequired, getSession } from '@auth0/nextjs-auth0'
 import Infographic from '../components/infographic'
 import { UserProfile } from '@auth0/nextjs-auth0/client'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Topic } from '../types'
 import Head from '../components/head'
+import React from 'react'
 
 const getLink = (href: string, text: string) => (
   <div className='group text-xl'>
@@ -14,9 +14,13 @@ const getLink = (href: string, text: string) => (
   </div>
 )
 
-type ProfileProps = { user: UserProfile }
+type Props = {
+  user?: UserProfile
+  lastModified?: number
+  topics?: { [k: string]: number }
+}
 
-const createView = (user: UserProfile, topics: Topic[]) => {
+const createView = (user: UserProfile, topics: { [k: string]: number }) => {
   return (
     <>
       <Infographic user={user as UserProfile} topics={topics} />
@@ -25,18 +29,20 @@ const createView = (user: UserProfile, topics: Topic[]) => {
   )
 }
 
-export default function Home({ user }: ProfileProps) {
-  const [topics, setTopics] = useState([] as Topic[])
+export default function Home(props: Props) {
+  const user = props.user as UserProfile
+  const [topics, setTopics] = useState(props.topics || {} as { [k: string]: number })
   useEffect(() => {
-    const fetchApi = async () => {
-      const response = await fetch('/api/topics')
-      const _topics = await response.json()
-      console.log(`GOT TOPICS: ${JSON.stringify(_topics, null, 2)}`)
-      setTopics(_topics)
+    if (!props.lastModified || +new Date() - props.lastModified > 24 * 3600 * 1000) {
+      const fetchApi = async () => {
+        const response = await fetch('/api/topics')
+        const _topics = await response.json()
+        console.log(`GOT TOPICS: ${JSON.stringify(_topics, null, 2)}`)
+        setTopics(_topics)
+      }
+      fetchApi()
     }
-
-    fetchApi()
-  }, [])
+  }, [props.lastModified])
   return (
     <>
       <Head />
@@ -49,4 +55,23 @@ export default function Home({ user }: ProfileProps) {
   )
 }
 
-export const getServerSideProps = withPageAuthRequired()
+export const getServerSideProps = withPageAuthRequired({
+  async getServerSideProps(ctx): Promise<{ props: Props }> {
+    const session = await getSession(ctx.req, ctx.res)
+    console.log('FETCHING FROM S3')
+    const response = await fetch(`https://cihan-tweeted-about-backend-bucket.s3.eu-west-1.amazonaws.com/user/${(session?.user['sub'] as string).split('|')[1]}/topics.json`)
+    console.log('FETCHED FROM S3: ' + response.headers.get('Last-Modified'))
+    if (response.status !== 200) {
+      return {
+        props: {}
+      }
+    }
+    const topics = await response.json()
+    return {
+      props: {
+        topics,
+        lastModified: new Date(response.headers.get('Last-Modified') as string).getTime(),
+      }
+    }
+  }
+})

@@ -3,6 +3,7 @@ import { useUser } from '@auth0/nextjs-auth0/client'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import Head from '../components/head'
+import React from 'react'
 
 const getLink = (href: string, text: string) => (
   <div className='group text-xl'>
@@ -19,7 +20,7 @@ export default function Home() {
     if (user) {
       router.push('/infographic')
     }
-  }, [user])
+  }, [router, user])
 
   return (
     <>

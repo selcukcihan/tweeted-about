@@ -1,3 +1,15 @@
+See the app in action on https://tweeted-about.selcukcihan.com
+
+# NextJS Setup
+* There are two pages: /index & /infographic
+* /infographic requires Twitter authentication
+* /infographic uses SSR to render the page using the most recent data from AWS S3.
+* /infographic uses CSR if the most recent data from AWS S3 is older than 24 hours or it does not exist at all.
+* Authentication is handled through auth0: https://github.com/auth0/nextjs-auth0
+* Backend application can be found on https://github.com/selcukcihan/tweeted-about-backend
+
+# Boilerplate
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started

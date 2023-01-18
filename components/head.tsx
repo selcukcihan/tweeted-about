@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import React from 'react'
 
 const DESCRIPTION = 'Infographic to show what you have been tweeting on.'
 const TITLE = 'Tweeted About'
