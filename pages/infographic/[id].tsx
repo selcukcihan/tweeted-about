@@ -2,7 +2,10 @@ import Infographic from '../../components/infographic'
 import { UserProfile } from '@auth0/nextjs-auth0/client'
 import Head from '../../components/head'
 import React from 'react'
-import { Topic } from '../../types'
+import { Topic } from '../../common/types'
+import { convertTopics, normalizeTopics } from '../../common/utils'
+import Footer from '../../components/footer'
+import { getLink } from '../../common/link'
 
 type Props = {
   user?: UserProfile
@@ -10,7 +13,13 @@ type Props = {
   topics?: Topic[]
 }
 
-const convert = (topics: any) => Object.entries(topics).map((t: any) => ({ name: t[0] as string, count: t[1] as number }))
+const loginButton = (
+  <React.Fragment>
+    <div className='flex flex-row justify-center items-center text-xs md:text-xl'>
+      {getLink('/api/auth/login', 'Login with Twitter to create your infographic!')}
+    </div>
+  </React.Fragment>
+)
 
 export default function Home(props: Props) {
   if (!props.topics || props.topics?.length === 0) {
@@ -21,9 +30,10 @@ export default function Home(props: Props) {
           <div className="flex flex-col mx-auto place-items-center h-screen w-screen md:w-1/2">
             <div className='flex-grow text-center w-full p-4'>
               <div className='text-2xl'>
-                {`Could not detect any topics from your tweets :(`}
+                {`Could not detect any topics from the tweets :(`}
               </div>
             </div>
+            <Footer/>
           </div>
         </main>
       </>
@@ -31,12 +41,14 @@ export default function Home(props: Props) {
   } else {
     return (
       <>
-        <Head />
+        <Head description={`Most of the tweets were about "${props.topics[0].name}".`} />
         <main className='bg-stone-100'>
           <div className="flex flex-col mx-auto place-items-center h-screen w-screen md:w-1/2">
             <div className='flex-grow text-center w-full p-4'>
+              {loginButton}
               <Infographic topics={props.topics}/>
             </div>
+            <Footer/>
           </div>
         </main>
       </>
@@ -57,7 +69,7 @@ export async function getServerSideProps(ctx: any): Promise<{ props: Props }> {
   const topics = await response.json()
   return {
     props: {
-      topics: convert(topics),
+      topics: normalizeTopics(convertTopics(topics)),
     }
   }
 }

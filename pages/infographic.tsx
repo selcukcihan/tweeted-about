@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { ReactElement, useEffect, useState } from 'react'
 import Head from '../components/head'
 import React from 'react'
-import { Topic } from '../types'
-import { normalizeTopics } from '../utils'
+import { Topic } from '../common/types'
+import { convertTopics, normalizeTopics } from '../common/utils'
+import Footer from '../components/footer'
 
 type Props = {
   user?: UserProfile
@@ -14,8 +15,6 @@ type Props = {
   topics?: Topic[]
   isLoaded?: boolean
 }
-
-const convert = (topics: any) => Object.entries(topics).map((t: any) => ({ name: t[0] as string, count: t[1] as number }))
 
 const getOuterComponent = (isLoaded: boolean, inner: ReactElement) => (
   <>
@@ -31,23 +30,25 @@ const getOuterComponent = (isLoaded: boolean, inner: ReactElement) => (
           </div>}
         {isLoaded && inner}
       </div>
+      <Footer/>
     </div>
   </main>
 </>
 )
 
 const getTwitterShareLink = (user: UserProfile, topics: Topic[]) => {
-  const MAX_BODY_LENGTH = 200
+  const MAX_BODY_LENGTH = 220
 
   const link = `https://${'tweeted-about.selcukcihan.com'}/infographic/${user.sub?.split('|')[1]}`
   const header = `I've tweeted about`
   let body = []
 
   for (let i = 0; i < topics.length; i++) {
-    if (body.join('\n').length > MAX_BODY_LENGTH) {
+    if ([...body, topics[i].name].join('\n').length < MAX_BODY_LENGTH) {
+      body.push(`${i + 1}- ${topics[i].name}`)
+    } else {
       break
     }
-    body.push(`${i + 1}- ${topics[i].name}`)
   }
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent([header, ...body].join('\n'))}&url=${link}&hashtags=TweetedAbout`
 }
@@ -61,7 +62,7 @@ export default function Home(props: Props) {
       const fetchApi = async () => {
         const response = await fetch('/api/topics')
         const _topics = await response.json()
-        setTopics(convert(_topics))
+        setTopics(normalizeTopics(convertTopics(_topics)))
         setIsLoaded(true)
       }
       setIsLoaded(false)
@@ -92,7 +93,7 @@ export default function Home(props: Props) {
         <div className='flex flex-row justify-center items-center text-xs md:text-xl'>
           <h2 className='flex-1'>{user.name}</h2>
           <div className='group px-10'>
-            <Link href={getTwitterShareLink(user, topics)}>
+            <Link target="_blank" href={getTwitterShareLink(user, topics)}>
               <button className='opacity-80 hover:opacity-100 hover:text-slate-200 font-light text-slate-100 rounded bg-sky-600 p-4'>Share on Twitter</button>
             </Link>
           </div>
@@ -122,7 +123,7 @@ export const getServerSideProps = withPageAuthRequired({
     const topics = await response.json()
     return {
       props: {
-        topics: normalizeTopics(convert(topics)),
+        topics: normalizeTopics(convertTopics(topics)),
         lastModified: new Date(response.headers.get('Last-Modified') as string).getTime(),
       }
     }

@@ -2,7 +2,7 @@ import React from 'react'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { Chart } from 'chart.js/auto'
 import { Pie } from 'react-chartjs-2'
-import { Topic } from '../types'
+import { Topic } from '../common/types'
 
 Chart.register(ChartDataLabels)
 
