@@ -30,7 +30,7 @@ export default function Infographic(props: { topics: Topic[] }) {
             },
             datalabels: {
               color: 'black',
-              formatter: (val: any) => val + '%',
+              formatter: (val: any) => val + '',
             },
           },
         }}
