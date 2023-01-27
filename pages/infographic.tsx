@@ -37,7 +37,7 @@ const getOuterComponent = (isLoaded: boolean, inner: ReactElement) => (
 )
 
 const getTwitterShareLink = (user: UserProfile, topics: Topic[]) => {
-  const MAX_BODY_LENGTH = 220
+  const MAX_BODY_LENGTH = 200
 
   const link = `https://${'tweeted-about.selcukcihan.com'}/infographic/${user.sub?.split('|')[1]}`
   const header = `I've tweeted about`
