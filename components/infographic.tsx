@@ -34,6 +34,9 @@ export default function Infographic(props: { topics: Topic[] }) {
         }}
         options={{
           plugins: {
+            legend: {
+              onClick: function() {},
+            },
             datalabels: {
               color: 'black',
               formatter: (val: any) => val + '%',
