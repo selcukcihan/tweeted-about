@@ -1,6 +1,9 @@
 import { Topic } from './types'
 
 export const normalizeTopics = (topics: Topic[]) => {
+  if (topics.length === 0) {
+    return topics
+  }
   // Sort by count descending, take the first 10 entries.
   const normalized = topics.sort((a, b) => b.count - a.count).slice(0, 10)
   
