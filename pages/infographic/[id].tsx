@@ -21,6 +21,16 @@ const loginButton = (
   </React.Fragment>
 )
 
+const getDescription = (topics: Topic[]) => {
+  if (topics.length > 1) {
+    return 'Other frequently tweeted topics were ' + topics.slice(1, 4).map(t => `"${t.name}"`).join(', ')
+  } else {
+    return ''
+  }
+}
+
+const getTitle = (topics: Topic[]) => topics.length > 0 ? `Mostly tweeted about "${topics[0].name}".` : 'No topics were detected :('
+
 export default function Home(props: Props) {
   if (!props.topics || props.topics?.length === 0) {
     return (
@@ -41,7 +51,7 @@ export default function Home(props: Props) {
   } else {
     return (
       <>
-        <Head description={`Most of the tweets were about "${props.topics[0].name}".`} />
+        <Head title={getTitle(props.topics)} description={getDescription(props.topics)} />
         <main className='bg-stone-100'>
           <div className="flex flex-col mx-auto place-items-center h-screen w-screen md:w-1/2">
             <div className='flex-grow text-center w-full p-4'>
